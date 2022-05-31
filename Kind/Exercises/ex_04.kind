@@ -1,5 +1,7 @@
 // Advanced exercises involving recursion
 
+// Advanced exercises involving recursion
+
 type Nat {
   zero
   succ(pred: Nat)
@@ -7,36 +9,93 @@ type Nat {
 
 // Doubles a number
 dbl(a: Nat): Nat // double
+  case a
+  {
+    zero: Nat.zero
+    succ: Nat.succ(Nat.succ(dbl(a.pred)))
+  }
+  
 
-  ?b
 
 // Addition
 add(a: Nat, b: Nat): Nat
+  case b
+  {
+    zero: a
+    succ: add(Nat.succ(a), b.pred)
+  }
 
-  ?a
 
 // Multiplication
 mul(a: Nat, b: Nat): Nat
-  
-  ?m
+  case a
+  {
+    zero: Nat.zero
+    succ: 
+      case b
+      {
+        zero: Nat.zero
+        succ: add(a, mul(a, b.pred))
+      }
+  }
+
 
 // Subtraction
 // 4 - 5 = 0
 // 5 - 4 = 1
 sub(a: Nat, b: Nat): Nat
+  case b
+  {
+    zero: a
+    succ: 
+      case a
+      {
+        zero: Nat.zero
+        succ: sub(a.pred, b.pred)
+      }
+  }
 
-  ?s
+
 
 // Factorial
 // 4! = 24
 fac(a: Nat): Nat 
-  
-  ?f
+  case a
+  {
+    zero: Nat.succ(Nat.zero)
+    succ: mul(a, fac(a.pred))
+  }
+
+// Division
+// 1 / 2 = 0
+// x / 0 = 0
+// 5 / 2 = 2
+// div(a: Nat, b: Nat): Nat // division
+//   case a
+//   {
+//     zero: 0
+//     succ: 
+//       case b
+//       {
+//         zero: 0
+//         succ: 
+//           if a >=? b then 
+//             Nat.succ(div(sub(a, b), b))
+//           else
+//             div(sub(a, b), b)
+//       }
+//   }
+
+
 
 // Equal
 eql(a: Nat, b: Nat): Bool // Given 2 numbers, it returns true if the 2 are the same and false if they are different.
-  
-  ?e 
+  case a b
+  {
+    zero zero: Bool.true
+    succ succ: eql(a.pred, b.pred)
+  } default Bool.false
+
 
 // Do not use the "not" function to create the functions below
 
@@ -44,46 +103,117 @@ eql(a: Nat, b: Nat): Bool // Given 2 numbers, it returns true if the 2 are the s
 // 2 > 1 = True
 // 3 > 3 = False
 gtn(a: Nat, b: Nat): Bool // if A > B == True else false
-  
-  ?g
+  case a b
+  {
+    succ zero: Bool.true
+    succ succ: gtn(a.pred, b.pred)
+  } default Bool.false
 
 // Lower than
 // 1 < 2 = True
 // 3 < 3 = False
 ltn(a: Nat, b: Nat): Bool // if A > B == False else true 
-  
-  ?l
+  case a b
+  {
+    zero succ: Bool.true
+    succ succ: ltn(a.pred, b.pred)
+  } default Bool.false
+
 
 // Minimum
 // min(2, 3) = 2
 // min(4, 1) = 1
 min(a: Nat, b: Nat): Nat // if A < B then A else B
-  
-  ?m2
+  case a b
+  {
+    zero succ: a
+    succ succ: Nat.succ(min(a.pred, b.pred))
+  } default b
+
 
 // Maximum
 // max(2, 3) = 3
 // max(4, 1) = 4
 max(a: Nat, b: Nat): Nat // if A > B then A else B
-  
-  ?m3
-
+ case a b
+ {
+   zero succ: b
+   succ succ: Nat.succ(max(a.pred, b.pred))
+ } default a
 
 // Divides a number by two
 // 2 / 2 = 1
 // 5 / 2 = 2
 // 1 / 2 = 0
 hlf(a: Nat): Nat
-  ?h
+ to_nat(Bits.drop(1, to_bits(a)))
+
+
+type Bits
+{
+  e
+  o(pred: Bits)
+  i(pred: Bits)
+}
+
+to_nat(b: Bits): Nat
+  case b
+  {
+    e: Nat.zero
+    o: dbl(to_nat(b.pred))
+    i: Nat.succ(dbl(to_nat(b.pred)))
+  }
+
+
+
+incb(b: Bits): Bits
+  case b
+  {
+    e: Bits.i(Bits.e)
+    o: Bits.i(b.pred)
+    i: Bits.o(incb(b.pred))
+  }
+
+
+to_bits(n: Nat): Bits
+  case n
+  {
+    zero: Bits.o(Bits.e)
+    succ: incb(to_bits(n.pred))
+  }
+
+Bits.drop(n: Nat, b: Bits): Bits
+  case n
+  {
+    zero: b
+    succ: 
+      case b
+      {
+        e: Bits.e
+        o: Bits.drop(n.pred, b.pred)
+        i: Bits.drop(n.pred, b.pred)
+      }
+  }
 
 // Division
 // 1 / 2 = 0
 // x / 0 = 0
 // 5 / 2 = 2
 div(a: Nat, b: Nat): Nat // division
-  
-  ?d
-
+  case a
+  {
+    zero: 0
+    succ: 
+      case b
+      {
+        zero: 0
+        succ: 
+          if a >=? b then 
+            Nat.succ(div(sub(a, b), b))
+          else
+            div(sub(a, b), b)
+      }
+  }
 
 ex_04: IO<Unit>
   IO {
