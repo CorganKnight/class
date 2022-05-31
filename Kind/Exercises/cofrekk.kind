@@ -1,0 +1,67 @@
+type Cofre {
+    new(dick: Bits, senha: Nat) //dick era dica kkkkkkkkkk
+  }
+
+// 100011101001
+// cada 4 bits = 1 número
+
+// Vai ser convertida em um número de 3 dígitos
+// Senha de exemplo: 1000 1110 1001  179
+// convertida em um número, 4 bits = 1 digito do número
+
+// drop 4 = 01111001
+// take 4 = 1000
+
+confirm_pass(cofre: Cofre, senha: Nat): Bool
+  Nat.eql(cofre@senha, Nat.random(senha))
+
+find_password(cofre: Cofre): Nat
+  let dick      = cofre@dick
+  let penis     = List.map<Bits, Nat>(Bits.to_nat, Bits.omg(dick))
+  // let pinto     = List.map<Nat, String>(Nat.show, penis)
+  // let fold      = List.fold<String>(pinto)
+  // let fold2     = fold!("", String.concat)
+  // Nat.read(fold2)
+  List.fold<Nat>(List.reverse<Nat>(penis), Nat, 0, (digit acum) digit + (acum * 10))
+  //List.foldk(0, (digit acum) digit + (acum * 10), List.map<Bits, Nat>(Bits.to_nat, Bits.omg(dica)))
+ 
+Bits.omg(b: Bits): List<Bits>
+  case b
+  {
+    e: List.nil<Bits>
+  } default List.cons<Bits>(Bits.take(4, b), Bits.omg(Bits.drop(4, b)))
+  
+// digits: List<Nat>
+//   List.map<Bits, Nat>(Bits.to_nat, Bits.omg(Bits.read("10100001010010010110111001001000110010011000110011101010010000010010011001001010")))
+
+// numerings: List<String>
+//   List.map<Nat, String>(Nat.show, digits)
+
+//List.foldk(0, (digit acum) digit + (acum * 10), digits)
+
+
+// List.fold<A: Type>(list: List<A>): <P: Type> -> P -> (A -> P -> P) -> P
+//   <P> (nil, cons)
+//   case list {
+//     nil : nil,
+//     cons: cons(list.head, List.fold<A>(list.tail)<P>(nil, cons))
+//   }
+
+
+List.foldk(nil: Nat, cons: Nat -> Nat -> Nat, list: List<Nat>): Nat
+  case list {
+    nil : nil
+    cons: log("List.head: " | Nat.show(list.head) | " acum: " | Nat.show(nil)) List.foldk(cons(list.head, nil), cons, list.tail)
+  }
+
+
+cofrekk:_
+  let cofre_a = Cofre.new(Bits.read("00101100000111100100011010100001111010010010101000001000010001001100000111101010"), 3003375686)
+  let cofre_b = Cofre.new(Bits.read("10100001010010010110111001001000110010011000110011101010010000010010011001001010"), 1274176956)
+  let cofre_c = Cofre.new(Bits.read("10000100001011001001001000000100110000101000110010010100110000100100000000000100"), 3536456361)
+  let a = confirm_pass(cofre_a, find_password(cofre_a))
+  let b = confirm_pass(cofre_b, find_password(cofre_b))
+  let c = confirm_pass(cofre_c, find_password(cofre_c))
+  List.show!(Bool.show [a b c])
+  //List.show!(Bits.show, Bits.omg(Bits.read("10100001010010010110111001001000110010011000110011101010010000010010011001001010")))
+  //List.show!(Nat.show, List.map<Bits, Nat>(Bits.to_nat, Bits.omg(Bits.read("10100001010010010110111001001000110010011000110011101010010000010010011001001010"))))
