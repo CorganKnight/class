@@ -56,7 +56,7 @@ Tests._04.eql(eql: Nat -> Nat -> Bool): IO<Unit>
   IO {
     Assert.bool("eql 0 3",    eql(0,    3), false)
     Assert.bool("eql 3 0",    eql(3,    0), false)
-    Assert.bool("eql 1 66",   eql(10,  66), false)
+    Assert.bool("eql 10 66",  eql(10,  66), false)
     Assert.bool("eql 66 10",  eql(66,  10), false)
     Assert.bool("eql 110 10", eql(110, 10), false)
     Assert.bool("eql 0 0",    eql(0,    0),  true)
