@@ -40,24 +40,74 @@ get<A: Type>(key: Nat, lm: ListMap<A>): Maybe<A>
 // Applies a function to a Value from a Key
 // Returns the same ListMap if the key is not present 
 mut<A: Type>(key: Nat, fn: A -> A, lm: ListMap<A>): ListMap<A>
-  ?mut
+  let val = get<A>(key, lm)
+  without val: lm
+  set<A>(key, fn(val), lm)
+  
+//FAZER VERSAO BRABA
+
+
+TestMap: ListMap<Nat>
+  ListMap.cons<Nat>(({0, 5})
+  ListMap.cons<Nat>(({1, 6})
+  ListMap.cons<Nat>(({2, 7})
+  ListMap.cons<Nat>(({3, 8})
+  ListMap.cons<Nat>(({4, 9})
+  ListMap.cons<Nat>(({5, 10})
+  ListMap.empty<Nat>))))))
+
+  //"[{0, 5}, {1, 6}, {2, 7}]"
 
 // Converts the ListMap to a String
 show<A: Type>(fn: A -> String, lm: ListMap<A>): String
-  ?show
+  case lm
+  {
+    empty: String.nil
+    cons:  
+      case lm.tail
+      {
+        empty: "{"|Nat.show(lm.head@fst)|", "|fn(lm.head@snd)|"}"|show<A>(fn, lm.tail)
+        cons:  "{"|Nat.show(lm.head@fst)|", "|fn(lm.head@snd)|"}, "|show<A>(fn, lm.tail)
+      }
+  }
+
+// ex_11:_
+//   show<Nat>(Nat.show, TestMap)
 
 // Checks if the ListMap has a key
 // Returns true if the key is present, false otherwise
 has<A:Type>(key: Nat, lm: ListMap<A>): Bool
-  ?has
+  case lm
+  {
+    empty: Bool.false
+    cons:  
+      case Nat.eql(key, lm.head@fst)
+      {
+        true:  Bool.true
+        false: has<A>(key, lm.tail)
+      }
+  }
 
 // Removes all Elements that doesn't satisfy a condition
 filter<A: Type>(cond: A -> Bool, lm: ListMap<A>): ListMap<A>
-  ?filter
+  case lm
+  {
+    empty: ListMap.empty<A>
+    cons:  
+      case cond(lm.head@snd)
+      {
+        true:  ListMap.cons<A>(lm.head, filter<A>(cond, lm.tail))
+        false: filter<A>(cond, lm.tail)
+      }
+  }
 
 // Applies a function to all Values
 map<A: Type>(fn: A -> A, lm: ListMap<A>): ListMap<A>
-  ?map
+  case lm
+  {
+    empty: ListMap.empty<A>
+    cons: ListMap.cons<A>(Pair.new<Nat, A>(lm.head@fst, fn(lm.head@snd)), map<A>(fn, lm.tail))
+  }
 
 // Runs x gets and y sets
 stress_test(sets: Nat, gets: Nat): String
@@ -74,8 +124,8 @@ ex_11: IO<Unit>
   IO {
     Tests._11.set(set)
     Tests._11.get(get)
-    // Tests._11.mut(mut)
-    // Tests._11.has(has)
-    // Tests._11.filter(filter)
-    // Tests._11.map(map)
+    Tests._11.mut(mut)
+    Tests._11.has(has)
+    Tests._11.filter(filter)
+    Tests._11.map(map)
   } 
