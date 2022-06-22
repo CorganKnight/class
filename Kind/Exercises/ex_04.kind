@@ -22,22 +22,31 @@ add(a: Nat, b: Nat): Nat
   case b
   {
     zero: a
-    succ: add(Nat.succ(a), b.pred)
+    succ: Nat.succ(add(a, b.pred))
   }
+
+addtaelin(n: Nat, m: Nat): Nat
+  case n
+  {
+    zero: m
+    succ: Nat.succ(addtaelin(n.pred, m))
+  }
+
+// Nat.add(n: Nat, m: Nat): Nat
+//   case n {
+//     zero: m
+//     succ: Nat.succ(Nat.add(n.pred, m))
+//   } kkkkk
 
 
 // Multiplication
-mul(a: Nat, b: Nat): Nat
+mul(a: Nat, b: Nat): Nat 
   case a
   {
     zero: Nat.zero
-    succ: 
-      case b
-      {
-        zero: Nat.zero
-        succ: add(a, mul(a, b.pred))
-      }
+    succ: addtaelin(b, mul(b, a.pred))
   }
+  
 
 
 // Subtraction
@@ -63,8 +72,13 @@ fac(a: Nat): Nat
   case a
   {
     zero: Nat.succ(Nat.zero)
-    succ: mul(a, fac(a.pred))
+    succ: 
+      let fa = fac(a.pred) 
+      mul(a, fa)
   }
+
+  ex_04:_
+   fac(10)
 
 // Division
 // 1 / 2 = 0

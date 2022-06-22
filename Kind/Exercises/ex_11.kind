@@ -66,7 +66,7 @@ show<A: Type>(fn: A -> String, lm: ListMap<A>): String
     cons:  
       case lm.tail
       {
-        empty: "{"|Nat.show(lm.head@fst)|", "|fn(lm.head@snd)|"}"|show<A>(fn, lm.tail)
+        empty: "{"|Nat.show(lm.head@fst)|", "|fn(lm.head@snd)|"}"
         cons:  "{"|Nat.show(lm.head@fst)|", "|fn(lm.head@snd)|"}, "|show<A>(fn, lm.tail)
       }
   }
@@ -102,11 +102,11 @@ filter<A: Type>(cond: A -> Bool, lm: ListMap<A>): ListMap<A>
   }
 
 // Applies a function to all Values
-map<A: Type>(fn: A -> A, lm: ListMap<A>): ListMap<A>
+map<A: Type, B: Type>(fn: A -> B, lm: ListMap<A>): ListMap<B>
   case lm
   {
-    empty: ListMap.empty<A>
-    cons: ListMap.cons<A>(Pair.new<Nat, A>(lm.head@fst, fn(lm.head@snd)), map<A>(fn, lm.tail))
+    empty: ListMap.empty<B>
+    cons: ListMap.cons<B>(Pair.new<Nat, B>(lm.head@fst, fn(lm.head@snd)), map<A, B>(fn, lm.tail))
   }
 
 

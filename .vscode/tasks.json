@@ -6,7 +6,7 @@
         {
             "label": "kind-run",
             "type": "shell",
-            "command": "cd ${fileDirname} && kind ${fileBasenameNoExtension} --run",
+            "command": "cd ${fileDirname} && time kind ${fileBasenameNoExtension} --run",
             "presentation": {
               "showReuseMessage": false,
               "clear": true,

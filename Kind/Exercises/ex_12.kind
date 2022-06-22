@@ -8,15 +8,61 @@ type BitsMap<A: Type> {
 // one
 
 set<A: Type>(key: Bits, val: A, map: BitsMap<A>): BitsMap<A>
-  ?set
+  case key
+{
+  e: 
+    case map
+    {
+      new: BitsMap.tie<A>(Maybe.some<A>(val), BitsMap.new<A>, BitsMap.new<A>)
+      tie: BitsMap.tie<A>(Maybe.some<A>(val), map.lft, map.rgt)
+    }
+  o: 
+    case map
+    {
+      new: BitsMap.tie<A>(Maybe.none<A>, set<A>(key.pred, val, map), BitsMap.new<A>)
+      tie: BitsMap.tie<A>(map.val, set<A>(key.pred, val, map.lft), map.rgt)
+    }
+  i: 
+    case map
+    {
+     new: BitsMap.tie<A>(Maybe.none<A>, BitsMap.new<A>, set<A>(key.pred, val, map))
+     tie: BitsMap.tie<A>(map.val, map.lft, set<A>(key.pred, val, map.rgt))
+    }
+}
 
 
+// set(Bits.i(Bits.o(Bits.e)), 50, mapowo)
+//   i tie: BitsMap.tie(mapowo.val, mapowo.lft, BitsMap.tie(mapowo.val, BitsMap.tie(some(50), BitsMap.new, BitsMap.new), BitsMap.new))
+//                                              o tie: BitsMap.tie(mapowo.val, BitsMap.tie(some(50), BitsMap.new, BitsMap.new), BitsMap.new)
+//                                                                             e new: BitsMap.tie(some(50), BitsMap.new, BitsMap.new)
+
+
+
+// BitsMap<Nat>(none, BitsMap.new<Nat>, BitsMap<Nat>(none, BitsMap<Nat>(some(50), BitsMap.new<Nat>, BitsMap.new<Nat>), BitsMap.new<Nat>))
+
+
+mapowo: BitsMap<Nat>
+  BitsMap.tie<Nat>(some(10), BitsMap.tie<Nat>(some(15), BitsMap.new<Nat>, BitsMap.new<Nat>), BitsMap.tie<Nat>(some(20), BitsMap.new<Nat>, BitsMap.new<Nat>))
+
+
+
+
+// set(Bits.e, val: 16, mapvazio)
+
+// set(Bits.i(Bits.i(Bits.i(Bits.e))) 54, Map)
+
+// BitsMap.tie(none, BitsMap.new, BitsMap.tie(none, BitsMap.new, BitsMap.tie(none, BitsMap.new, BitsMap.tie(some(54), BitsMap.new, BitsMap.new))))
 
 // Given a key, gets the value that correspond to the given key, 
 // If there it is no value for the key, returns Maybe.none<A>
 
-get<A: Type>(key: Bits, map:BitsMap<A>): Maybe<A>
-  ?get
+get<A: Type>(key: Bits, map: BitsMap<A>): Maybe<A>
+  case key map
+  {
+    e tie: map.val
+    i tie: get<A>(key.pred, map.rgt)
+    o tie: get<A>(key.pred, map.lft)
+  } default Maybe.none<A>
 
 
 //Applies a function to a Value of the specific key and returns the same map but
@@ -24,7 +70,9 @@ get<A: Type>(key: Bits, map:BitsMap<A>): Maybe<A>
 //doesn't change the map
 
 mut<A: Type>(key: Bits, fn: A -> A, map: BitsMap<A>): BitsMap<A>
-  ?mut
+  let val = get<A>(key, map)
+  without val: map
+  set<A>(key, fn(val), map)
 
 
 //Deletes a Value of the map within the given key, returns the same map if no
@@ -33,10 +81,15 @@ mut<A: Type>(key: Bits, fn: A -> A, map: BitsMap<A>): BitsMap<A>
 //Receives:
   // key of the type Bits
   // map of the type BitsMap<A>
-  // returns a Maybe<A>
+  // returns a BitsMap<A>
 
-//del<A: Type>(...)
-
+del<A: Type>(key: Bits, map: BitsMap<A>): BitsMap<A>
+  case key map
+  {
+    e tie: BitsMap.tie<A>(none, map.lft, map.rgt)
+    i tie: BitsMap.tie<A>(map.val, map.lft, del<A>(key.pred, map.rgt))
+    o tie: BitsMap.tie<A>(map.val, del<A>(key.pred, map.lft), map.rgt)
+  } default map
 
 //Verifies if has any value for the given key, if has no value returns false, if
 //has the value returns true
@@ -46,7 +99,13 @@ mut<A: Type>(key: Bits, fn: A -> A, map: BitsMap<A>): BitsMap<A>
   // map of the type BitsMap<A>
   // returns a Bool
 
-//has...
+has<A: Type>(key: Bits, map: BitsMap<A>): Bool
+  case key map
+  {
+    e tie: Maybe.is_some<A>(map.val)
+    i tie: has<A>(key.pred, map.rgt)
+    o tie: has<A>(key.pred, map.lft)
+  } default Bool.false
 
 
 
@@ -55,34 +114,141 @@ mut<A: Type>(key: Bits, fn: A -> A, map: BitsMap<A>): BitsMap<A>
 
 
 filter<A: Type>(cond: A -> Bool, map: BitsMap<A>): BitsMap<A>
-  ?filter
+  case map
+  {
+    new: BitsMap.new<A>
+    tie: 
+      case map.val
+      {
+        none: BitsMap.tie<A>(map.val, filter<A>(cond, map.lft), filter<A>(cond, map.rgt))
+        some: 
+          case cond(map.val.value)
+          {
+            true:  BitsMap.tie<A>(map.val, filter<A>(cond, map.lft), filter<A>(cond, map.rgt))
+            false: BitsMap.tie<A>(Maybe.none<A>, filter<A>(cond, map.lft), filter<A>(cond, map.rgt))
+          }
+      }
+  }
 
-
+// ex_12:_
+//   IO.print(BitsMap.show!(Nat.show map<Nat, Nat>(Nat.succ, mapowo)))
 
 //Applies a function to  all values of the map and returns the map modified 
 
-map<A: Type, B: Type>(fn: A -> B, map: BitsMap<A>): BitsMap<B>
-  ?map
+map<A: Type, B: Type>(fn: A -> B, mapa: BitsMap<A>): BitsMap<B>
+  case mapa
+  {
+    new: BitsMap.new<B>
+    tie:
+      case mapa.val
+      {
+        none: BitsMap.tie<B>(Maybe.none<B>, map<A, B>(fn, mapa.lft), map<A, B>(fn, mapa.rgt))
+        some: BitsMap.tie<B>(Maybe.some<B>(fn(mapa.val.value)), map<A, B>(fn, mapa.lft), map<A, B>(fn, mapa.rgt))
+      }
+  }
+  
 
 
 
 // Returns a list of keys with all Keys of the map
 
 key<A: Type>(map: BitsMap<A>): List<Bits>
-  ?key
+ key.go<A>(Bits.e, map, [])
 
 
+
+key.go<A: Type>(key: Bits, map: BitsMap<A>, acum: List<Bits>): List<Bits>
+  case map
+  {
+    new: acum
+    tie: 
+      case map.val
+      {
+        none: List.concat<Bits>(key.go<A>(Bits.o(key), map.lft, acum), key.go<A>(Bits.i(key), map.rgt, []))
+        some: List.concat<Bits>(key.go<A>(Bits.o(key), map.lft, acum), key.go<A>(Bits.i(key), map.rgt, List.cons<Bits>(key, [])))
+      }
+  }
+
+is_tie<A: Type>(key: Bits, map: BitsMap<A>): Bool
+  case key map 
+  {
+    e tie: Bool.true
+    i tie: is_tie<A>(key.pred, map.rgt)
+    o tie: is_tie<A>(key.pred, map.lft)
+  } default Bool.false
+
+
+//DHQ 5101
+
+// ex_12:_
+
+
+
+mapowo: BitsMap<Nat>
+  BitsMap.tie<Nat>(some(10), BitsMap.tie<Nat>(some(15), BitsMap.new<Nat>, BitsMap.new<Nat>), BitsMap.tie<Nat>(some(20), BitsMap.new<Nat>, BitsMap.new<Nat>))
 
 //Unites two different maps into one, keeping its structure
 
 union<A: Type>(a: BitsMap<A>, b: BitsMap<A>): BitsMap<A>
-  ?union
-
+  case a b
+  {
+    tie new: a
+    new tie: b
+    tie tie: 
+      case a.val
+      {
+        none: BitsMap.tie<A>(b.val, union<A>(a.lft, b.lft), union<A>(a.rgt, b.rgt))
+        some: BitsMap.tie<A>(a.val, union<A>(a.lft, b.lft), union<A>(a.rgt, b.rgt))
+      }
+    new new: BitsMap.new<A>
+  }
 
 //Stress Test for BitsMap
 
 stress_test(sets: Nat, gets: Nat): IO<Unit>
   Tests.stress.bmap(sets, gets)
 
-//ex_12:_
+BitsMap.show<A: Type>(show: A -> String, map: BitsMap<A>): String
+ BitsMap.show.go<A>(1, show, map)
+
+BitsMap.show.go<A: Type>(depth: Nat, show: A -> String, map: BitsMap<A>): String
+  let n = String.repeat(" ", depth)
+    case map
+    {
+      new: " Empty"
+      tie:
+        "Tie(" | Maybe.show<A>(show, map.val) |
+        "\n " | n | "Lft: " | BitsMap.show.go<A>(Nat.succ(depth), show, map.lft) |
+        "\n " | n | "Rgt: " | BitsMap.show.go<A>(Nat.succ(depth), show, map.rgt) | ")"
+    }
+  
+  
+// ex_12:_
+//   let t = set<Nat>(Bits.read("0"), 0, BitsMap.new<Nat>)
+//   let t = set<Nat>(Bits.e, 0, t)
+//   let t = set<Nat>(Bits.read("00"), 0, t)
+//   let t = set<Nat>(Bits.read("00001"), 0, t)
+//   let t = set<Nat>(Bits.read("01"), 0, t)
+//   let t = set<Nat>(Bits.read("11"), 0, t)
+//   let t = set<Nat>(Bits.read("111111"), 0, t)
+//   let t = set<Nat>(Bits.read("1010101011"), 0, t)
+//   let t = set<Nat>(Bits.read("110110110"), 0, t)
+//   let t = set<Nat>(Bits.read("110110110"), 3, t)
+//   // List.show<Bits>(Bits.show, key<Nat>(mapowo))
+//   //List.show!(Bits.show, key<Nat>(mapowo))
+//   //Bits.show(Bits.o(Bits.o(Bits.o(Bits.e))))
+//   IO.print(BitsMap.show!(Nat.show, union<Nat>(mapowo, t)))
   //stress_test(4000000, 100)
+
+ex_12: IO<Unit>
+  IO {
+    Tests._12.set(set)
+    Tests._12.get(get)
+    Tests._12.mut(mut)
+    Tests._12.del(del)
+    Tests._12.has(has)
+    Tests._12.filter(filter)
+    Tests._12.map(map)
+    Tests._12.key(key)
+    Tests._12.union(union)
+  } 
