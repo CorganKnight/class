@@ -1,3 +1,8 @@
+type ListMap <A: Type> { 
+  empty
+  cons(head: Pair<Nat, A>, tail: ListMap<A>)
+}
+
 lm: ListMap<Nat>
   ListMap.empty<Nat>
 
@@ -15,6 +20,15 @@ TestMap: ListMap<Nat>
   ListMap.cons<Nat>(({4,  9})
   ListMap.cons<Nat>(({5, 10})
   ListMap.empty<Nat>))))))
+
+TestMapShow: ListMap<String>
+  ListMap.cons<String>(({0,  "5"})
+  ListMap.cons<String>(({1,  "6"})
+  ListMap.cons<String>(({2,  "7"})
+  ListMap.cons<String>(({3,  "8"})
+  ListMap.cons<String>(({4,  "9"})
+  ListMap.cons<String>(({5, "10"})
+  ListMap.empty<String>))))))
 
 TestMapmut1: ListMap<Nat>
   ListMap.cons<Nat>(({0,  5})
@@ -34,7 +48,7 @@ TestMapw: ListMap<Nat>
   ListMap.cons<Nat>(({9,  14})
   ListMap.empty<Nat>))))))
 
-  TestMapwdouble: ListMap<Nat>
+  TestMapWDouble: ListMap<Nat>
   ListMap.cons<Nat>(({6,   12})
   ListMap.cons<Nat>(({13,  60})
   ListMap.cons<Nat>(({26,  30})
@@ -108,7 +122,7 @@ TestMapBoolMutNot4: ListMap<Bool>
   ListMap.cons<Bool>(({3, Bool.false})
   ListMap.empty<Bool>)))
 
-  TestMapBoolmapnot: ListMap<Bool>
+  TestMapBoolMapNot: ListMap<Bool>
   ListMap.cons<Bool>(({0,   Bool.true})
   ListMap.cons<Bool>(({1,   Bool.true})
   ListMap.cons<Bool>(({2,  Bool.false})
@@ -161,8 +175,9 @@ Tests._11.filter(filter: <A: Type> -> (A -> Bool) -> ListMap<A> -> ListMap<A>): 
 
 Tests._11.map(map: <A: Type> -> <B: Type> -> (A -> B) -> ListMap<A> -> ListMap<B>): IO<Unit>
   IO {
-    Assert.listmap<Nat>(Assert.nat.funcs, "map Nat.succ TestMap",   map<Nat>(Nat.succ,       TestMap),       TestMapSucc)
-    Assert.listmap<Nat>(Assert.nat.funcs, "map Nat.double TestMap", map<Nat>(Nat.double,    TestMapw),    TestMapwdouble)
-    Assert.listmap<Bool>(Assert.bool.funcs, "map Bool.not TestMap", map<Bool>(Bool.not,  TestMapBool), TestMapBoolmapnot)
+    Assert.listmap<Nat>(Assert.nat.funcs, "map Nat.succ TestMap",        map<Nat, Nat>(Nat.succ,        TestMap),       TestMapSucc)
+    Assert.listmap<Nat>(Assert.nat.funcs, "map Nat.double TestMapw",     map<Nat, Nat>(Nat.double,     TestMapw),    TestMapWDouble)
+    Assert.listmap<Bool>(Assert.bool.funcs, "map Bool.not TestMapBool",  map<Bool, Bool>(Bool.not,  TestMapBool), TestMapBoolMapNot)
+    Assert.listmap<String>(Assert.string.funcs, "map Nat.show TestMap",  map<Nat, String>(Nat.show,     TestMap),       TestMapShow)
     IO.print("map: All terms tested")
   }
